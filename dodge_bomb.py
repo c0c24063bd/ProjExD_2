@@ -29,7 +29,7 @@ def gameover(screen: pg.Surface) -> None:  # 演習１
     screen.blit(eg_img, (0, 0))
     pg.display.update()
     time.sleep(5)
-    return screen
+
 
 
 def check_bound(rct: pg.Rect) -> tuple[bool, bool]:  # 練習3
@@ -59,6 +59,7 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:  # 演習2
         pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
         bb_imgs.append(bb_img)
     return bb_imgs, bb_accs
+print(init_bb_imgs.__doc__)
 
 
 def main():
