@@ -5,7 +5,6 @@ import time
 import pygame as pg
 
 
-
 WIDTH, HEIGHT = 1100, 650
 DELTA = {
     pg.K_UP : (0, -5),
@@ -48,6 +47,20 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:  # 練習3
     return yoko, tate
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:  # 演習2
+    """
+    引数：なし
+    戻り値：爆弾Surfaceリスト、加速度リスト
+    """
+    bb_imgs:list[pg.Surface]= []
+    bb_accs:list[int] = [a for a in range(1, 11)]  # 加速度リスト
+    for r in range(1, 11):  # 爆弾リスト
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_imgs.append(bb_img)
+    return bb_imgs, bb_accs
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -65,6 +78,8 @@ def main():
 
     clock = pg.time.Clock()
     tmr = 0
+    bb_imgs, bb_accs = init_bb_imgs()
+    print(bb_imgs)
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -79,14 +94,6 @@ def main():
 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
-        # if key_lst[pg.K_UP]:
-        #     sum_mv[1] -= 5
-        # if key_lst[pg.K_DOWN]:
-        #     sum_mv[1] += 5
-        # if key_lst[pg.K_LEFT]:
-        #     sum_mv[0] -= 5
-        # if key_lst[pg.K_RIGHT]:
-        #     sum_mv[0] += 5
         for key, mv in DELTA.items():
             if key_lst[key]:
                 sum_mv[0] += mv[0]  # 横方向の移動量
@@ -95,12 +102,23 @@ def main():
         if check_bound(kk_rct) != (True, True):  # 画面外なら
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 移動をなかったことにする
         screen.blit(kk_img, kk_rct)
+
+        idx = min(tmr // 500, 9)  # 演習2
+        prev_center = bb_rct.center
+        bb_img = bb_imgs[idx]
+        bb_rct = bb_img.get_rect()
+        bb_rct.center = prev_center  # サイズ変更後も中心を同じに
+        avx = vx * bb_accs[idx]
+        avy = vy * bb_accs[idx]
+        bb_rct.move_ip(avx, avy)
+
+
         yoko, tate = check_bound(bb_rct)
         if not yoko:  # 横方向にはみ出ていたら
             vx *= -1
         if not tate:  # 縦方向にはみ出ていたら
             vy *= -1
-        bb_rct.move_ip(vx,vy)
+
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
